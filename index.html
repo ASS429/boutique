@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+
+<html lang="fr">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Ma Boutique - Gestion Complète</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+        .app-container {
+            max-width: 100%; width: 100%; max-width: 900px;
+            margin: 0 auto;
+            box-shadow: 0 0 30px rgba(0,0,0,0.2);
+            border-radius: 25px;
+            overflow: hidden;
+            background: white;
+            min-height: 100vh;
+        }
+        .big-button {
+            transition: all 0.3s ease;
+            transform: scale(1);
+        }
+        .big-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        .big-button:active {
+            transform: scale(0.98);
+        }
+        .slide-in {
+            animation: slideIn 0.4s ease-out;
+        }
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        .fade-in {
+            animation: fadeIn 0.3s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        .category-habits {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+        .category-cosmetiques {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+        .category-chaussures {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        }
+        .category-accessoires {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        }
+    
+    @media (max-width: 600px) {
+        .big-button {
+            font-size: 1rem;
+            padding: 0.75rem 1rem;
+        }
+    }
+    @media (min-width: 601px) {
+        .app-container {
+            border-radius: 15px;
+        }
+    }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-purple-50 to-pink-50">
+<div class="app-container">
+<!-- En-tête -->
+<div class="bg-gradient-to-r from-purple-600 to-pink-600 text-white p-6">
+<div class="flex items-center justify-between">
+<button class="text-3xl" id="backBtn" onclick="showSection('menu')" style="display: none;">←</button>
+<div class="text-center flex-1">
+<h1 class="text-2xl font-bold">🏪 Ma Boutique</h1>
+<div class="text-sm opacity-90">Ventes aujourd'hui: <span class="pulse" id="ventesToday">0</span></div>
+</div>
+<div class="text-3xl pulse">💰</div>
+</div>
+</div>
+<!-- Menu Principal -->
+<div class="p-6 space-y-6" id="menuSection">
+<!-- Résumé du jour -->
+<div class="bg-white rounded-3xl p-6 shadow-lg">
+<h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
+<span class="text-2xl mr-2">📊</span>
+                    Aujourd'hui
+                </h3>
+<div class="grid grid-cols-3 gap-4">
+<div class="text-center bg-green-50 rounded-2xl p-4">
+<div class="text-2xl font-bold text-green-600" id="chiffreAffaires">0 F</div>
+<div class="text-xs text-green-700">Recettes</div>
+</div>
+<div class="text-center bg-blue-50 rounded-2xl p-4">
+<div class="text-2xl font-bold text-blue-600" id="articlesVendus">0</div>
+<div class="text-xs text-blue-700">Articles</div>
+</div>
+<div class="text-center bg-orange-50 rounded-2xl p-4">
+<div class="text-2xl font-bold text-orange-600" id="stockTotal">0</div>
+<div class="text-xs text-orange-700">En stock</div>
+</div>
+</div>
+</div>
+<!-- Actions principales -->
+<div class="grid grid-cols-2 gap-4">
+<button class="big-button bg-gradient-to-br from-green-400 to-green-600 text-white p-8 rounded-3xl text-center shadow-lg" onclick="showSection('vente')">
+<div class="text-6xl mb-3">💳</div>
+<div class="font-bold text-xl">VENDRE</div>
+<div class="text-sm opacity-90">Nouvelle vente</div>
+</button>
+<button class="big-button bg-gradient-to-br from-blue-400 to-blue-600 text-white p-8 rounded-3xl text-center shadow-lg" onclick="showSection('stock')">
+<div class="text-6xl mb-3">📦</div>
+<div class="font-bold text-xl">STOCK</div>
+<div class="text-sm opacity-90">Gérer produits</div>
+</button>
+<button class="big-button bg-gradient-to-br from-purple-400 to-purple-600 text-white p-8 rounded-3xl text-center shadow-lg" onclick="showSection('categories')">
+<div class="text-6xl mb-3">🏷️</div>
+<div class="font-bold text-xl">CATÉGORIES</div>
+<div class="text-sm opacity-90">Organiser</div>
+</button>
+<button class="big-button bg-gradient-to-br from-orange-400 to-orange-600 text-white p-8 rounded-3xl text-center shadow-lg" onclick="showSection('rapports')">
+<div class="text-6xl mb-3">📈</div>
+<div class="font-bold text-xl">RAPPORTS</div>
+<div class="text-sm opacity-90">Voir gains</div>
+</button>
+</div>
+<!-- Alertes stock faible -->
+<div class="bg-gradient-to-r from-red-100 to-orange-100 rounded-3xl p-6 shadow-lg" id="alertesStock" style="display: none;">
+<h3 class="text-lg font-bold mb-4 flex items-center text-red-700">
+<span class="text-2xl mr-2">⚠️</span>
+                    Stock Faible
+                </h3>
+<div class="space-y-2" id="produitsStockFaible">
+<!-- Les produits en stock faible apparaîtront ici -->
+</div>
+</div>
+</div>
+<!-- Section Vente -->
+<div class="hidden slide-in p-6" id="venteSection">
+<h2 class="text-2xl font-bold mb-6 text-center">💳 Nouvelle Vente</h2>
+<!-- Panier -->
+<div class="bg-white rounded-3xl p-6 shadow-lg mb-6">
+<h3 class="text-lg font-bold mb-4 flex items-center">
+<span class="text-2xl mr-2">🛒</span>
+                    Panier
+                </h3>
+<div class="space-y-3 mb-4 min-h-[100px]" id="panierItems">
+<div class="text-gray-500 text-center py-8">
+<div class="text-4xl mb-2">🛒</div>
+<div>Panier vide</div>
+</div>
+</div>
+<div class="border-t pt-4">
+<div class="flex justify-between items-center text-2xl font-bold mb-4">
+<span>TOTAL:</span>
+<span class="text-green-600" id="totalPanier">0 F</span>
+</div>
+<button class="w-full bg-gradient-to-r from-green-500 to-green-600 text-white py-4 rounded-2xl font-bold text-lg shadow-lg" onclick="showModal('paiement')">
+                        💰 ENCAISSER
+                    </button>
+</div>
+</div>
+<!-- Sélection par catégorie -->
+<div class="space-y-4">
+<h3 class="text-lg font-bold">Choisir des produits:</h3>
+<div class="grid grid-cols-2 gap-3" id="categoriesVente">
+<!-- Les catégories seront ajoutées ici -->
+</div>
+</div>
+</div>
+<!-- Section Stock -->
+<div class="hidden slide-in p-6" id="stockSection">
+<div class="flex justify-between items-center mb-6">
+<h2 class="text-2xl font-bold">📦 Mon Stock</h2>
+<button class="bg-blue-600 text-white px-4 py-2 rounded-2xl text-sm font-bold" onclick="showModal('ajoutProduit')">+ AJOUTER</button>
+</div>
+<!-- Filtres par catégorie -->
+<div class="flex gap-2 mb-6 overflow-x-auto pb-2" id="filtreCategories">
+<button class="filtre-btn bg-blue-500 text-white px-4 py-2 rounded-full text-sm font-bold whitespace-nowrap" onclick="filtrerProduits('tous')">Tous</button>
+</div>
+<div class="space-y-4" id="listeProduits">
+<!-- Les produits seront affichés ici -->
+</div>
+</div>
+<!-- Section Catégories -->
+<div class="hidden slide-in p-6" id="categoriesSection">
+<div class="flex justify-between items-center mb-6">
+<h2 class="text-2xl font-bold">🏷️ Catégories</h2>
+<button class="bg-purple-600 text-white px-4 py-2 rounded-2xl text-sm font-bold" onclick="showModal('ajoutCategorie')">+ AJOUTER</button>
+</div>
+<div class="space-y-4" id="listeCategories">
+<!-- Les catégories seront affichées ici -->
+</div>
+</div>
+<!-- Section Rapports -->
+<div class="hidden slide-in p-6" id="rapportsSection">
+<h2 class="text-2xl font-bold mb-6 text-center">📈 Mes Rapports</h2>
+<div class="space-y-6">
+<!-- Résumé financier -->
+<div class="bg-white rounded-3xl p-6 shadow-lg">
+<h3 class="text-lg font-bold mb-4">💰 Résumé Financier</h3>
+<div class="grid grid-cols-2 gap-4">
+<div class="bg-green-50 rounded-2xl p-4 text-center">
+<div class="text-3xl font-bold text-green-600" id="recettesJour">0 F</div>
+<div class="text-sm text-green-700">Aujourd'hui</div>
+</div>
+<div class="bg-blue-50 rounded-2xl p-4 text-center">
+<div class="text-3xl font-bold text-blue-600" id="recettesSemaine">0 F</div>
+<div class="text-sm text-blue-700">Cette semaine</div>
+</div>
+</div>
+</div>
+<!-- Méthodes de paiement -->
+<div class="bg-white rounded-3xl p-6 shadow-lg">
+<h3 class="text-lg font-bold mb-4">💳 Paiements</h3>
+<div class="space-y-3" id="rapportsPaiements">
+<!-- Les stats de paiement seront affichées ici -->
+</div>
+</div>
+<!-- Produits populaires -->
+<div class="bg-white rounded-3xl p-6 shadow-lg">
+<h3 class="text-lg font-bold mb-4">🔥 Produits Populaires</h3>
+<div class="space-y-3" id="produitsPopulaires">
+<!-- Les produits populaires seront affichés ici -->
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Modales -->
+<div class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4" id="modalOverlay">
+<!-- Modal Ajout Produit -->
+<div class="bg-white rounded-3xl p-6 w-full max-w-sm hidden fade-in" id="modalAjoutProduit">
+<h3 class="text-2xl font-bold mb-6 text-center">📦 Nouveau Produit</h3>
+<div class="space-y-4">
+<input class="w-full p-4 border-2 rounded-2xl text-lg" id="nomProduit" placeholder="Nom du produit" type="text"/>
+<select class="w-full p-4 border-2 rounded-2xl text-lg" id="categorieProduit">
+<option value="">Choisir catégorie</option>
+</select>
+<input class="w-full p-4 border-2 rounded-2xl text-lg" id="prixProduit" placeholder="Prix (F CFA)" type="number"/>
+<input class="w-full p-4 border-2 rounded-2xl text-lg" id="stockProduit" placeholder="Quantité en stock" type="number"/>
+<textarea class="w-full p-4 border-2 rounded-2xl text-lg h-20" id="descriptionProduit" placeholder="Description (optionnel)"></textarea>
+<div class="flex gap-3">
+<button class="flex-1 bg-gray-300 text-gray-700 py-4 rounded-2xl font-bold" onclick="hideModal()">Annuler</button>
+<button class="flex-1 bg-blue-600 text-white py-4 rounded-2xl font-bold" onclick="ajouterProduit()">Ajouter</button>
+</div>
+</div>
+</div>
+<!-- Modal Ajout Catégorie -->
+<div class="bg-white rounded-3xl p-6 w-full max-w-sm hidden fade-in" id="modalAjoutCategorie">
+<h3 class="text-2xl font-bold mb-6 text-center">🏷️ Nouvelle Catégorie</h3>
+<div class="space-y-4">
+<input class="w-full p-4 border-2 rounded-2xl text-lg" id="nomCategorie" placeholder="Nom de la catégorie" type="text"/>
+<div class="grid grid-cols-4 gap-3">
+<button class="emoji-btn p-3 text-3xl border-2 rounded-2xl hover:bg-blue-100" onclick="selectEmoji('👕')" type="button">👕</button>
+<button class="emoji-btn p-3 text-3xl border-2 rounded-2xl hover:bg-blue-100" onclick="selectEmoji('💄')" type="button">💄</button>
+<button class="emoji-btn p-3 text-3xl border-2 rounded-2xl hover:bg-blue-100" onclick="selectEmoji('👠')" type="button">👠</button>
+<button class="emoji-btn p-3 text-3xl border-2 rounded-2xl hover:bg-blue-100" onclick="selectEmoji('💍')" type="button">💍</button>
+<button class="emoji-btn p-3 text-3xl border-2 rounded-2xl hover:bg-blue-100" onclick="selectEmoji('🎒')" type="button">🎒</button>
+<button class="emoji-btn p-3 text-3xl border-2 rounded-2xl hover:bg-blue-100" onclick="selectEmoji('👜')" type="button">👜</button>
+<button class="emoji-btn p-3 text-3xl border-2 rounded-2xl hover:bg-blue-100" onclick="selectEmoji('🧴')" type="button">🧴</button>
+<button class="emoji-btn p-3 text-3xl border-2 rounded-2xl hover:bg-blue-100" onclick="selectEmoji('✨')" type="button">✨</button>
+</div>
+<input id="emojiCategorie" type="hidden" value="🏷️"/>
+<div class="flex gap-3">
+<button class="flex-1 bg-gray-300 text-gray-700 py-4 rounded-2xl font-bold" onclick="hideModal()">Annuler</button>
+<button class="flex-1 bg-purple-600 text-white py-4 rounded-2xl font-bold" onclick="ajouterCategorie()">Ajouter</button>
+</div>
+</div>
+</div>
+<!-- Modal Méthodes de Paiement -->
+<div class="bg-white rounded-3xl p-6 w-full max-w-sm hidden fade-in" id="modalPaiement">
+<h3 class="text-2xl font-bold mb-6 text-center">💳 Choisir Paiement</h3>
+<div class="space-y-4">
+<button class="w-full bg-green-500 text-white p-4 rounded-2xl text-lg font-bold flex items-center justify-center gap-3" onclick="finaliserVente('especes')">
+<span class="text-2xl">💵</span>
+                    Espèces
+                </button>
+<button class="w-full bg-blue-500 text-white p-4 rounded-2xl text-lg font-bold flex items-center justify-center gap-3" onclick="finaliserVente('wave')">
+<span class="text-2xl">📱</span>
+                    Wave
+                </button>
+<button class="w-full bg-orange-500 text-white p-4 rounded-2xl text-lg font-bold flex items-center justify-center gap-3" onclick="finaliserVente('orange')">
+<span class="text-2xl">📞</span>
+                    Orange Money
+                </button>
+<button class="w-full bg-gray-300 text-gray-700 p-4 rounded-2xl text-lg font-bold" onclick="hideModal()">
+                    Annuler
+                </button>
+</div>
+</div>
+</div>
+<script>
+        // Données de l'application
+        let appData = {
+            categories: [
+                {id: 1, nom: "Habits", emoji: "👕", couleur: "category-habits"},
+                {id: 2, nom: "Cosmétiques", emoji: "💄", couleur: "category-cosmetiques"},
+                {id: 3, nom: "Chaussures", emoji: "👠", couleur: "category-chaussures"},
+                {id: 4, nom: "Accessoires", emoji: "💍", couleur: "category-accessoires"}
+            ],
+            produits: [
+                {id: 1, nom: "Robe élégante", categorie: 1, prix: 15000, stock: 5, vendu: 0, description: "Belle robe pour soirée"},
+                {id: 2, nom: "Rouge à lèvres", categorie: 2, prix: 3000, stock: 12, vendu: 0, description: "Rouge longue tenue"},
+                {id: 3, nom: "Jeans femme", categorie: 1, prix: 8000, stock: 8, vendu: 0, description: "Jeans taille haute"},
+                {id: 4, nom: "Escarpins noirs", categorie: 3, prix: 12000, stock: 3, vendu: 0, description: "Chaussures élégantes"},
+                {id: 5, nom: "Sac à main", categorie: 4, prix: 18000, stock: 4, vendu: 0, description: "Sac en cuir véritable"}
+            ],
+            ventes: [],
+            panier: [],
+            stats: {
+                ventesJour: 0,
+                chiffreAffaires: 0,
+                paiements: {especes: 0, wave: 0, orange: 0}
+            }
+        };
+
+        let currentSection = 'menu';
+
+        // Navigation
+        function showSection(section) {
+            // Cacher toutes les sections
+            const sections = ['menu', 'vente', 'stock', 'categories', 'rapports'];
+            sections.forEach(s => {
+                document.getElementById(s + 'Section').classList.add('hidden');
+            });
+            
+            // Afficher la section demandée
+            document.getElementById(section + 'Section').classList.remove('hidden');
+            
+            // Gérer le bouton retour
+            const backBtn = document.getElementById('backBtn');
+            if (section === 'menu') {
+                backBtn.style.display = 'none';
+            } else {
+                backBtn.style.display = 'block';
+            }
+            
+            currentSection = section;
+            
+            // Initialiser la section
+            if (section === 'vente') {
+                afficherCategoriesVente();
+                afficherPanier();
+            } else if (section === 'stock') {
+                afficherProduits();
+                afficherFiltresCategories();
+            } else if (section === 'categories') {
+                afficherCategories();
+            } else if (section === 'rapports') {
+                afficherRapports();
+            } else if (section === 'menu') {
+                updateStats();
+                verifierStockFaible();
+            }
+        }
+
+        // Gestion des modales
+        function showModal(modalName) {
+            document.getElementById('modalOverlay').classList.remove('hidden');
+            document.getElementById('modal' + modalName.charAt(0).toUpperCase() + modalName.slice(1)).classList.remove('hidden');
+            
+            if (modalName === 'ajoutProduit') {
+                remplirSelectCategories();
+            }
+        }
+
+        function hideModal() {
+            document.getElementById('modalOverlay').classList.add('hidden');
+            document.querySelectorAll('[id^="modal"]').forEach(modal => {
+                modal.classList.add('hidden');
+            });
+            
+            // Reset forms
+            document.getElementById('nomProduit').value = '';
+            document.getElementById('categorieProduit').value = '';
+            document.getElementById('prixProduit').value = '';
+            document.getElementById('stockProduit').value = '';
+            document.getElementById('descriptionProduit').value = '';
+            document.getElementById('nomCategorie').value = '';
+            document.getElementById('emojiCategorie').value = '🏷️';
+            
+            // Reset emoji selection
+            document.querySelectorAll('.emoji-btn').forEach(btn => {
+                btn.classList.remove('bg-blue-200', 'border-blue-400');
+            });
+        }
+
+        // Fonctions de statistiques
+        function updateStats() {
+            document.getElementById('ventesToday').textContent = appData.stats.ventesJour;
+            document.getElementById('chiffreAffaires').textContent = appData.stats.chiffreAffaires.toLocaleString() + ' F';
+            document.getElementById('articlesVendus').textContent = appData.stats.ventesJour;
+            document.getElementById('stockTotal').textContent = appData.produits.reduce((total, p) => total + p.stock, 0);
+        }
+
+        function verifierStockFaible() {
+            const produitsStockFaible = appData.produits.filter(p => p.stock <= 5 && p.stock > 0);
+            const alertesDiv = document.getElementById('alertesStock');
+            const container = document.getElementById('produitsStockFaible');
+            
+            if (produitsStockFaible.length > 0) {
+                alertesDiv.style.display = 'block';
+                container.innerHTML = '';
+                
+                produitsStockFaible.forEach(produit => {
+                    const categorie = appData.categories.find(c => c.id === produit.categorie);
+                    const div = document.createElement('div');
+                    div.className = 'bg-white rounded-xl p-3 flex justify-between items-center';
+                    div.innerHTML = `
+                        <span class="font-bold">${categorie ? categorie.emoji : '📦'} ${produit.nom}</span>
+                        <span class="text-red-600 font-bold">${produit.stock} restants</span>
+                    `;
+                    container.appendChild(div);
+                });
+            } else {
+                alertesDiv.style.display = 'none';
+            }
+        }
+
+        // Fonctions de vente
+        function afficherCategoriesVente() {
+            const container = document.getElementById('categoriesVente');
+            container.innerHTML = '';
+            
+            appData.categories.forEach(categorie => {
+                const produitsCategorie = appData.produits.filter(p => p.categorie === categorie.id && p.stock > 0);
+                if (produitsCategorie.length === 0) return;
+                
+                const div = document.createElement('div');
+                div.className = `big-button ${categorie.couleur} text-white p-4 rounded-2xl text-center cursor-pointer shadow-lg`;
+                div.onclick = () => afficherProduitsCategorie(categorie.id);
+                div.innerHTML = `
+                    <div class="text-4xl mb-2">${categorie.emoji}</div>
+                    <div class="font-bold">${categorie.nom}</div>
+                    <div class="text-sm opacity-90">${produitsCategorie.length} produits</div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function afficherProduitsCategorie(categorieId) {
+            const produits = appData.produits.filter(p => p.categorie === categorieId && p.stock > 0);
+            const container = document.getElementById('categoriesVente');
+            
+            container.innerHTML = `
+                <div class="col-span-2 mb-4">
+                    <button onclick="afficherCategoriesVente()" class="text-blue-600 font-bold">← Retour aux catégories</button>
+                </div>
+            `;
+            
+            produits.forEach(produit => {
+                const div = document.createElement('div');
+                div.className = 'bg-white border-2 border-gray-200 p-4 rounded-2xl text-center cursor-pointer hover:border-blue-400 transition-all';
+                div.onclick = () => ajouterAuPanier(produit);
+                div.innerHTML = `
+                    <div class="font-bold text-lg mb-1">${produit.nom}</div>
+                    <div class="text-2xl font-bold text-green-600 mb-1">${produit.prix.toLocaleString()} F</div>
+                    <div class="text-sm text-gray-600">Stock: ${produit.stock}</div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function ajouterAuPanier(produit) {
+            const existant = appData.panier.find(item => item.id === produit.id);
+            if (existant) {
+                if (existant.quantite < produit.stock) {
+                    existant.quantite++;
+                } else {
+                    alert('❌ Stock insuffisant!');
+                    return;
+                }
+            } else {
+                appData.panier.push({...produit, quantite: 1});
+            }
+            afficherPanier();
+        }
+
+        function afficherPanier() {
+            const container = document.getElementById('panierItems');
+            const total = document.getElementById('totalPanier');
+            
+            if (appData.panier.length === 0) {
+                container.innerHTML = `
+                    <div class="text-gray-500 text-center py-8">
+                        <div class="text-4xl mb-2">🛒</div>
+                        <div>Panier vide</div>
+                    </div>
+                `;
+                total.textContent = '0 F';
+                return;
+            }
+            
+            container.innerHTML = '';
+            let totalPrix = 0;
+            
+            appData.panier.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'flex justify-between items-center bg-gray-50 rounded-2xl p-3';
+                div.innerHTML = `
+                    <div>
+                        <div class="font-bold">${item.nom}</div>
+                        <div class="text-sm text-gray-600">${item.prix.toLocaleString()} F × ${item.quantite}</div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button onclick="modifierQuantitePanier(${item.id}, -1)" class="bg-red-500 text-white w-8 h-8 rounded-full text-sm font-bold">-</button>
+                        <span class="font-bold text-lg w-8 text-center">${item.quantite}</span>
+                        <button onclick="modifierQuantitePanier(${item.id}, 1)" class="bg-green-500 text-white w-8 h-8 rounded-full text-sm font-bold">+</button>
+                    </div>
+                `;
+                container.appendChild(div);
+                totalPrix += item.prix * item.quantite;
+            });
+            
+            total.textContent = totalPrix.toLocaleString() + ' F';
+        }
+
+        function modifierQuantitePanier(id, delta) {
+            const item = appData.panier.find(i => i.id === id);
+            const produit = appData.produits.find(p => p.id === id);
+            
+            if (item) {
+                item.quantite += delta;
+                if (item.quantite <= 0) {
+                    appData.panier = appData.panier.filter(i => i.id !== id);
+                } else if (item.quantite > produit.stock) {
+                    item.quantite = produit.stock;
+                    alert('❌ Stock insuffisant!');
+                }
+                afficherPanier();
+            }
+        }
+
+        function finaliserVente(methodePaiement) {
+            if (appData.panier.length === 0) {
+                alert('❌ Le panier est vide!');
+                return;
+            }
+            
+            let totalVente = 0;
+            appData.panier.forEach(item => {
+                const produit = appData.produits.find(p => p.id === item.id);
+                produit.stock -= item.quantite;
+                produit.vendu += item.quantite;
+                totalVente += item.prix * item.quantite;
+            });
+            
+            // Enregistrer la vente
+            appData.ventes.push({
+                date: new Date(),
+                items: [...appData.panier],
+                total: totalVente,
+                paiement: methodePaiement
+            });
+            
+            // Mettre à jour les stats
+            appData.stats.ventesJour++;
+            appData.stats.chiffreAffaires += totalVente;
+            appData.stats.paiements[methodePaiement] += totalVente;
+            
+            // Vider le panier
+            appData.panier = [];
+            
+            afficherPanier();
+            updateStats();
+            hideModal();
+            
+            // Afficher confirmation
+            const methodesNoms = {
+                especes: 'Espèces 💵',
+                wave: 'Wave 📱',
+                orange: 'Orange Money 📞'
+            };
+            
+            alert(`✅ Vente finalisée!\nTotal: ${totalVente.toLocaleString()} F\nPaiement: ${methodesNoms[methodePaiement]}`);
+        }
+
+        // Fonctions de gestion des produits
+        function remplirSelectCategories() {
+            const select = document.getElementById('categorieProduit');
+            select.innerHTML = '<option value="">Choisir catégorie</option>';
+            
+            appData.categories.forEach(categorie => {
+                const option = document.createElement('option');
+                option.value = categorie.id;
+                option.textContent = `${categorie.emoji} ${categorie.nom}`;
+                select.appendChild(option);
+            });
+        }
+
+        function ajouterProduit() {
+            const nom = document.getElementById('nomProduit').value;
+            const categorie = parseInt(document.getElementById('categorieProduit').value);
+            const prix = parseInt(document.getElementById('prixProduit').value);
+            const stock = parseInt(document.getElementById('stockProduit').value);
+            const description = document.getElementById('descriptionProduit').value;
+            
+            if (nom && categorie && prix && stock) {
+                const newId = Math.max(...appData.produits.map(p => p.id)) + 1;
+                appData.produits.push({
+                    id: newId, 
+                    nom, 
+                    categorie, 
+                    prix, 
+                    stock, 
+                    vendu: 0,
+                    description: description || ''
+                });
+                
+                if (currentSection === 'stock') {
+                    afficherProduits();
+                }
+                updateStats();
+                hideModal();
+                alert('✅ Produit ajouté avec succès!');
+            } else {
+                alert('❌ Veuillez remplir tous les champs obligatoires!');
+            }
+        }
+
+        function afficherFiltresCategories() {
+            const container = document.getElementById('filtreCategories');
+            container.innerHTML = '<button onclick="filtrerProduits(\'tous\')" class="filtre-btn bg-blue-500 text-white px-4 py-2 rounded-full text-sm font-bold whitespace-nowrap">Tous</button>';
+            
+            appData.categories.forEach(categorie => {
+                const button = document.createElement('button');
+                button.className = 'filtre-btn bg-gray-200 px-4 py-2 rounded-full text-sm font-bold whitespace-nowrap';
+                button.textContent = `${categorie.emoji} ${categorie.nom}`;
+                button.onclick = () => filtrerProduits(categorie.id);
+                container.appendChild(button);
+            });
+        }
+
+        function filtrerProduits(categorieId) {
+            // Mettre à jour les boutons actifs
+            document.querySelectorAll('.filtre-btn').forEach(btn => {
+                btn.classList.remove('bg-blue-500', 'text-white');
+                btn.classList.add('bg-gray-200');
+            });
+            event.target.classList.add('bg-blue-500', 'text-white');
+            event.target.classList.remove('bg-gray-200');
+            
+            afficherProduits(categorieId);
+        }
+
+        function afficherProduits(categorieFilter = 'tous') {
+            const container = document.getElementById('listeProduits');
+            container.innerHTML = '';
+            
+            let produits = appData.produits;
+            if (categorieFilter !== 'tous') {
+                produits = produits.filter(p => p.categorie === categorieFilter);
+            }
+            
+            produits.forEach(produit => {
+                const categorie = appData.categories.find(c => c.id === produit.categorie);
+                const div = document.createElement('div');
+                const stockColor = produit.stock < 5 ? 'text-red-600' : produit.stock < 10 ? 'text-orange-600' : 'text-green-600';
+                
+                div.className = 'bg-white rounded-2xl p-4 shadow-lg';
+                div.innerHTML = `
+                    <div class="flex justify-between items-start mb-3">
+                        <div>
+                            <div class="text-lg font-bold">${produit.nom}</div>
+                            <div class="text-sm text-gray-600">${categorie ? categorie.emoji + ' ' + categorie.nom : 'Sans catégorie'}</div>
+                            ${produit.description ? `<div class="text-xs text-gray-500 mt-1">${produit.description}</div>` : ''}
+                        </div>
+                        <div class="text-right">
+                            <div class="text-xl font-bold text-green-600">${produit.prix.toLocaleString()} F</div>
+                            <div class="text-sm ${stockColor} font-bold">Stock: ${produit.stock}</div>
+                        </div>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="modifierStock(${produit.id}, -1)" class="bg-red-500 text-white px-4 py-2 rounded-lg text-sm font-bold">- Stock</button>
+                        <button onclick="modifierStock(${produit.id}, 1)" class="bg-green-500 text-white px-4 py-2 rounded-lg text-sm font-bold">+ Stock</button>
+                        <button onclick="supprimerProduit(${produit.id})" class="bg-gray-500 text-white px-4 py-2 rounded-lg text-sm">🗑️</button>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function modifierStock(id, delta) {
+            const produit = appData.produits.find(p => p.id === id);
+            if (produit && produit.stock + delta >= 0) {
+                produit.stock += delta;
+                afficherProduits();
+                updateStats();
+            }
+        }
+
+        function supprimerProduit(id) {
+            if (confirm('❓ Êtes-vous sûr de vouloir supprimer ce produit?')) {
+                appData.produits = appData.produits.filter(p => p.id !== id);
+                afficherProduits();
+                updateStats();
+                alert('✅ Produit supprimé!');
+            }
+        }
+
+        // Fonctions de gestion des catégories
+        function selectEmoji(emoji) {
+            document.getElementById('emojiCategorie').value = emoji;
+            document.querySelectorAll('.emoji-btn').forEach(btn => {
+                btn.classList.remove('bg-blue-200', 'border-blue-400');
+            });
+            event.target.classList.add('bg-blue-200', 'border-blue-400');
+        }
+
+        function ajouterCategorie() {
+            const nom = document.getElementById('nomCategorie').value;
+            const emoji = document.getElementById('emojiCategorie').value;
+            
+            if (nom) {
+                const newId = Math.max(...appData.categories.map(c => c.id)) + 1;
+                const couleurs = [
+                    'category-habits',
+                    'category-cosmetiques', 
+                    'category-chaussures',
+                    'category-accessoires'
+                ];
+                const couleur = couleurs[newId % couleurs.length];
+                
+                appData.categories.push({id: newId, nom, emoji, couleur});
+                
+                if (currentSection === 'categories') {
+                    afficherCategories();
+                }
+                hideModal();
+                alert('✅ Catégorie ajoutée avec succès!');
+            } else {
+                alert('❌ Veuillez saisir un nom de catégorie!');
+            }
+        }
+
+        function afficherCategories() {
+            const container = document.getElementById('listeCategories');
+            container.innerHTML = '';
+            
+            appData.categories.forEach(categorie => {
+                const produitsCount = appData.produits.filter(p => p.categorie === categorie.id).length;
+                const div = document.createElement('div');
+                div.className = `${categorie.couleur} text-white rounded-2xl p-6 shadow-lg`;
+                div.innerHTML = `
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <div class="text-4xl mb-2">${categorie.emoji}</div>
+                            <div class="text-xl font-bold">${categorie.nom}</div>
+                            <div class="text-sm opacity-90">${produitsCount} produits</div>
+                        </div>
+                        <button onclick="supprimerCategorie(${categorie.id})" class="bg-white bg-opacity-20 text-white px-3 py-2 rounded-lg text-sm">
+                            🗑️
+                        </button>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function supprimerCategorie(id) {
+            const produitsCategorie = appData.produits.filter(p => p.categorie === id);
+            if (produitsCategorie.length > 0) {
+                alert('❌ Impossible de supprimer cette catégorie car elle contient des produits!');
+                return;
+            }
+            
+            if (confirm('❓ Êtes-vous sûr de vouloir supprimer cette catégorie?')) {
+                appData.categories = appData.categories.filter(c => c.id !== id);
+                afficherCategories();
+                alert('✅ Catégorie supprimée!');
+            }
+        }
+
+        // Fonctions de rapports
+        function afficherRapports() {
+            document.getElementById('recettesJour').textContent = appData.stats.chiffreAffaires.toLocaleString() + ' F';
+            document.getElementById('recettesSemaine').textContent = appData.stats.chiffreAffaires.toLocaleString() + ' F';
+            
+            // Rapports de paiements
+            const containerPaiements = document.getElementById('rapportsPaiements');
+            containerPaiements.innerHTML = '';
+            
+            const methodesNoms = {
+                especes: {nom: 'Espèces', emoji: '💵', couleur: 'green'},
+                wave: {nom: 'Wave', emoji: '📱', couleur: 'blue'},
+                orange: {nom: 'Orange Money', emoji: '📞', couleur: 'orange'}
+            };
+            
+            Object.entries(appData.stats.paiements).forEach(([methode, montant]) => {
+                const info = methodesNoms[methode];
+                const div = document.createElement('div');
+                div.className = `bg-${info.couleur}-50 rounded-2xl p-3 flex justify-between items-center`;
+                div.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <span class="text-2xl">${info.emoji}</span>
+                        <span class="font-bold text-${info.couleur}-800">${info.nom}</span>
+                    </div>
+                    <span class="font-bold text-${info.couleur}-600">${montant.toLocaleString()} F</span>
+                `;
+                containerPaiements.appendChild(div);
+            });
+            
+            // Produits populaires
+            const containerPopulaires = document.getElementById('produitsPopulaires');
+            containerPopulaires.innerHTML = '';
+            
+            const produitsPopulaires = appData.produits
+                .filter(p => p.vendu > 0)
+                .sort((a, b) => b.vendu - a.vendu)
+                .slice(0, 5);
+            
+            if (produitsPopulaires.length === 0) {
+                containerPopulaires.innerHTML = '<div class="text-gray-500 text-center py-4">Aucune vente encore</div>';
+            } else {
+                produitsPopulaires.forEach(produit => {
+                    const div = document.createElement('div');
+                    div.className = 'flex justify-between items-center bg-gray-50 rounded-lg p-3';
+                    div.innerHTML = `
+                        <div class="font-bold">${produit.nom}</div>
+                        <div class="text-blue-600 font-bold">${produit.vendu} vendus</div>
+                    `;
+                    containerPopulaires.appendChild(div);
+                });
+            }
+        }
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', function() {
+            updateStats();
+            verifierStockFaible();
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96d1dd864036034d',t:'MTc1NDg1Mzc4MS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
